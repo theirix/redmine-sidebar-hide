@@ -1,4 +1,22 @@
 <% if sidebar_content? %>
+  <% if Redmine::VERSION::MAJOR.to_i >= 6 %>
+    <%# Redmine 6+ ships with a built-in collapsible sidebar (#sidebar-switch-button /
+        collapsibleSidebar jQuery plugin).  Adding a second toggle button would create a
+        confusing UX and conflict with the native state machine.  Instead we just
+        re-apply the cookie preference by programmatically triggering the native button
+        once the DOM is ready (after collapsibleSidebar() has registered its handler). %>
+    <% if cookies["sidebar_hide"] == "hide" %>
+      <script>
+        $(function() {
+          // Only trigger if the native mechanism hasn't already collapsed the sidebar
+          // from localStorage (avoids a double-toggle flicker).
+          if ($('#main').hasClass('collapsiblesidebar') && !$('#main').hasClass('collapsedsidebar')) {
+            $('#sidebar-switch-button').trigger('click');
+          }
+        });
+      </script>
+    <% end %>
+  <% else %>
     <div id="sidebarHandler">
         <div id="hideSidebarButton" onclick="hideSideBar()"></div>
     </div>
@@ -9,4 +27,5 @@
             });
         </script>
     <% end %>
+  <% end %>
 <% end %>

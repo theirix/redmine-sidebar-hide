@@ -35,5 +35,22 @@ function hideSideBar()
 }
 
 $(function() {
-    $('#context-menu').appendTo('#main');
+    if ($('#main').hasClass('collapsiblesidebar')) {
+        // Redmine 6+: a built-in collapsible sidebar is present
+        // (#sidebar-switch-button / collapsibleSidebar jQuery plugin).
+        // Our own toggle button is not rendered (_hideButton_partial.html.erb).
+        // Mirror clicks on the native button back into the cookie so the server-side
+        // partial can read the preference on the next page load.
+        $('#sidebar-switch-button').on('click.sidebar_hide', function() {
+            // The collapsibleSidebar handler toggles 'collapsedsidebar' synchronously;
+            // use setTimeout(0) to read the class after all synchronous handlers fire.
+            setTimeout(function() {
+                setCookie('sidebar_hide', $('#main').hasClass('collapsedsidebar') ? 'hide' : 'show', 100);
+            }, 0);
+        });
+    } else {
+        // classic behaviour for Redmine 5
+        // No native collapsible sidebar: move context-menu into #main
+        $('#context-menu').appendTo('#main');
+    }
 });
